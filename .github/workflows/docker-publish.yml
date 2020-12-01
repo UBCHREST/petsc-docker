@@ -27,8 +27,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: determine version
-        run: echo "test=v1.2.3." >> $GITHUB_ENV
-        echo "to log info: ${test}"
+        run: |
+            echo "test=v1.2.3." >> $GITHUB_ENV
+            echo "to log info: ${test}"
 
 #      - name: Run tests
 #        run: |
