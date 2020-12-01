@@ -26,14 +26,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Run tests
-        run: |
-          if [ -f docker-compose.test.yml ]; then
-            docker-compose --file docker-compose.test.yml build
-            docker-compose --file docker-compose.test.yml run sut
-          else
-            docker build . --file Dockerfile
-          fi
+      - name: determine version
+        run: echo "test=v1.2.3." >> $GITHUB_ENV
+        run: echo "to log info: ${test}"
+
+#      - name: Run tests
+#        run: |
+#          if [ -f docker-compose.test.yml ]; then
+#            docker-compose --file docker-compose.test.yml build
+#            docker-compose --file docker-compose.test.yml run sut
+#          else
+#            docker build . --file Dockerfile
+#          fi
 
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
@@ -46,6 +50,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+
+#       - name: set version and push tag
+#         id: tag_version
+#         uses: mathieudutour/github-tag-action@v5
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           custom_tag: ""
+
 
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
