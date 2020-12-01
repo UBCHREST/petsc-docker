@@ -28,7 +28,7 @@ jobs:
 
       - name: determine version
         run: echo "test=v1.2.3." >> $GITHUB_ENV
-        run: echo "to log info: ${test}"
+        echo "to log info: ${test}"
 
 #      - name: Run tests
 #        run: |
