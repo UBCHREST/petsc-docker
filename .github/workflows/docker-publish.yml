@@ -28,11 +28,11 @@ jobs:
 
       - name: determine version
         run: |
-            echo "test=v1.2.3." >> $GITHUB_ENV
+            echo "VERSION=$(awk '/ENV PETSC_VERSION/ {print $NF}' Dockerfile)" >> $GITHUB_ENV
 
       - name: print version
         run: |
-            echo "print version: ${test}"
+            echo "print version: ${VERSION}"
 
 #      - name: Run tests
 #        run: |
