@@ -19,3 +19,4 @@ run make install
 
 # Share the package location
 ENV PKG_CONFIG_PATH="/petsc/lib/pkgconfig:$PKG_CONFIG_PATH"
+ENV PATH="/petsc/bin:$PATH"
