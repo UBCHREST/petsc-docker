@@ -1,7 +1,5 @@
 FROM gcc:latest
 
-run echo nproc $(nproc)
-
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
 ENV PETSC_VERSION v3.14.2
