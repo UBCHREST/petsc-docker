@@ -58,6 +58,5 @@ run ./configure \
 	
 run make PETSC_DIR=/petsc PETSC_ARCH=arch-opt all check
 
-
 # Set default values
 ENV PETSC_DIR=/petsc
