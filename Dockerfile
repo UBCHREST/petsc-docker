@@ -2,7 +2,7 @@ FROM gcc:latest
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
-ENV PETSC_VERSION v3.14.2
+ENV PETSC_VERSION 8e3dbcca
 
 # Install dependencies 
 RUN apt-get update
@@ -10,8 +10,9 @@ RUN apt-get install git
 RUN apt-get install -y cmake
 
 # Clone PETSc
-run git clone --branch ${PETSC_VERSION} --depth 1 ${PETSC_URL} /petsc
+run git clone ${PETSC_URL} /petsc
 WORKDIR /petsc
+run git checkout ${PETSC_VERSION}
 
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=gcc \
