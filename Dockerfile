@@ -2,7 +2,7 @@ FROM gcc:latest
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
-ENV PETSC_VERSION 8e3dbcca
+ENV PETSC_VERSION 4cb72fa8
 
 # Install dependencies 
 RUN apt-get update
