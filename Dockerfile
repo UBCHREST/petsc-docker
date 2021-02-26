@@ -1,18 +1,22 @@
-FROM gcc:latest
+FROM ubuntu:latest
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
-ENV PETSC_VERSION 4cb72fa8
+ENV PETSC_VERSION v3.14.4 
 
 # Install dependencies 
+ENV DEBIAN_FRONTEND=noninteractive 
 RUN apt-get update
-RUN apt-get install git
-RUN apt-get install -y cmake
+RUN apt-get -y install git build-essential gfortran
+RUN apt-get -y install python
+RUN apt-get -y install cmake
+RUN apt-get -y install zlib1g-dev slepc-dev libpng-dev
 
 # Clone PETSc
-run git clone ${PETSC_URL} /petsc
+WORKDIR /
+RUN git clone ${PETSC_URL} /petsc
 WORKDIR /petsc
-run git checkout ${PETSC_VERSION}
+RUN git checkout ${PETSC_VERSION}
 
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=gcc \
