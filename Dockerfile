@@ -7,10 +7,7 @@ ENV PETSC_VERSION v3.14.4
 # Install dependencies 
 ENV DEBIAN_FRONTEND=noninteractive 
 RUN apt-get update
-RUN apt-get -y install git build-essential gfortran
-RUN apt-get -y install python3 python3-distutils
-RUN apt-get -y install cmake
-RUN apt-get -y install zlib1g-dev slepc-dev libpng-dev
+RUN apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils zlib1g-dev libpng-dev libtool clang-format pkg-config
 
 # Clone PETSc
 WORKDIR /
@@ -40,7 +37,7 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--download-suitesparse \
 	--download-superlu_dist \
 	--download-triangle \
-	--with-slepc \
+	--download-slepc \
 	--withlibpng=1 \
 	--with-zlib=1
 
