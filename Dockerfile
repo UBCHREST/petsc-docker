@@ -8,7 +8,7 @@ ENV PETSC_VERSION v3.14.4
 ENV DEBIAN_FRONTEND=noninteractive 
 RUN apt-get update
 RUN apt-get -y install git build-essential gfortran
-RUN apt-get -y install python
+RUN apt-get -y install python3 python3-distutils
 RUN apt-get -y install cmake
 RUN apt-get -y install zlib1g-dev slepc-dev libpng-dev
 
