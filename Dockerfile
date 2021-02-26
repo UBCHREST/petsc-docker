@@ -37,7 +37,6 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--download-parmetis \
 	--download-pnetcdf \
 	--download-scalapack \
-	--download-slepc \
 	--download-suitesparse \
 	--download-superlu_dist \
 	--download-triangle \
