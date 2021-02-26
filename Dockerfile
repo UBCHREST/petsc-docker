@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:groovy
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
@@ -7,7 +7,7 @@ ENV PETSC_VERSION v3.14.4
 # Install dependencies 
 ENV DEBIAN_FRONTEND=noninteractive 
 RUN apt-get update
-RUN apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils zlib1g-dev libpng-dev libtool clang-format pkg-config
+RUN apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils libtool clang-format pkg-config libpng-dev
 
 # Clone PETSc
 WORKDIR /
@@ -38,8 +38,8 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--download-superlu_dist \
 	--download-triangle \
 	--download-slepc \
-	--withlibpng=1 \
-	--with-zlib=1
+	--with-libpng \
+	--download-zlib
 
 # Configure & Build PETSc a Debug Build
 ENV PETSC_ARCH=arch-debug
