@@ -1,18 +1,19 @@
-FROM gcc:latest
+FROM ubuntu:groovy
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
-ENV PETSC_VERSION 4cb72fa8
+ENV PETSC_VERSION 42122872 
 
 # Install dependencies 
+ENV DEBIAN_FRONTEND=noninteractive 
 RUN apt-get update
-RUN apt-get install git
-RUN apt-get install -y cmake
+RUN apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils libtool clang-format pkg-config libpng-dev
 
 # Clone PETSc
-run git clone ${PETSC_URL} /petsc
+WORKDIR /
+RUN git clone ${PETSC_URL} /petsc
 WORKDIR /petsc
-run git checkout ${PETSC_VERSION}
+RUN git checkout ${PETSC_VERSION}
 
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=gcc \
@@ -33,13 +34,12 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--download-parmetis \
 	--download-pnetcdf \
 	--download-scalapack \
-	--download-slepc \
 	--download-suitesparse \
 	--download-superlu_dist \
 	--download-triangle \
-	--with-slepc \
-	--withlibpng=1 \
-	--with-zlib=1
+	--download-slepc \
+	--with-libpng \
+	--download-zlib
 
 # Configure & Build PETSc a Debug Build
 ENV PETSC_ARCH=arch-debug
