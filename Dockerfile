@@ -2,7 +2,7 @@ FROM ubuntu:groovy
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
-ENV PETSC_VERSION 50cd3162 
+ENV PETSC_VERSION 80425c32 
 
 # Install dependencies 
 ENV DEBIAN_FRONTEND=noninteractive 
