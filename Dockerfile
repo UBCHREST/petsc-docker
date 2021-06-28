@@ -2,7 +2,7 @@ FROM ubuntu:groovy
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
-ENV PETSC_VERSION 50cd3162 
+ENV PETSC_VERSION 18e93c00 
 
 # Install dependencies 
 ENV DEBIAN_FRONTEND=noninteractive 
@@ -38,6 +38,7 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--download-superlu_dist \
 	--download-triangle \
 	--download-slepc \
+	--download-tchem \
 	--with-libpng \
 	--download-zlib
 
