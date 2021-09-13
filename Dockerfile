@@ -15,6 +15,9 @@ RUN git clone ${PETSC_URL} /petsc
 WORKDIR /petsc
 RUN git checkout ${PETSC_VERSION}
 
+# Apply the fix from Jed's branch
+RUN git checkout 8d1aee66 config/BuildSystem/config/packages/tchem.py
+
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--with-cxx=g++ \
@@ -26,8 +29,7 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--download-exodusii \
 	--download-fftw \
 	--download-hdf5 \
-	--download-metis \
-	--download-ml \
+	--download-metis \	
 	--download-mumps \
 	--download-netcdf \
 	--download-p4est \
@@ -42,23 +44,46 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--with-libpng \
 	--download-zlib
 
-# Configure & Build PETSc a Debug Build
+# Configure & Build PETSc a 32-bit indices Debug Build
 ENV PETSC_ARCH=arch-debug
 run ./configure \
 	PETSC_ARCH=arch-debug \
+	--with-64-bit-indices=0 \
 	--with-debugging=1 \
 	${PETSC_SETUP_ARGS}
 	
 run make PETSC_DIR=/petsc PETSC_ARCH=arch-debug all check
 
-# Configure & Build PETSc a Release Build
+# Configure & Build PETSc a 32-bit indices Release Build
 ENV PETSC_ARCH=arch-opt
 run ./configure \
 	PETSC_ARCH=arch-opt \
+	--with-64-bit-indices=0 \
 	--with-debugging=0 \
 	${PETSC_SETUP_ARGS}
 	
 run make PETSC_DIR=/petsc PETSC_ARCH=arch-opt all check
+
+# Configure & Build PETSc a 64-bit indices Debug Build
+ENV PETSC_ARCH=arch-debug
+run ./configure \
+	PETSC_ARCH=arch-debug-64 \
+	--with-64-bit-indices=1 \
+	--with-debugging=1 \
+	${PETSC_SETUP_ARGS}
+	
+run make PETSC_DIR=/petsc PETSC_ARCH=arch-debug-64 all check
+
+# Configure & Build PETSc a 64-bit indices Release Build
+ENV PETSC_ARCH=arch-opt
+run ./configure \
+	PETSC_ARCH=arch-opt-64 \
+	--with-64-bit-indices=1 \	
+	--with-debugging=0 \
+	${PETSC_SETUP_ARGS}
+	
+run make PETSC_DIR=/petsc PETSC_ARCH=arch-opt-64 all check
+
 
 # Set default values
 ENV PETSC_DIR=/petsc
