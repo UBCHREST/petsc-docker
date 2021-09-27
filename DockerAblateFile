@@ -1,0 +1,62 @@
+FROM petsc_image:latest
+
+# Install dependencies
+RUN apt-get update
+RUN apt-get install -y clang-format
+
+# Define location of ABLATE
+ENV ABLATE_URL https://github.com/UBCHREST/ablate.git
+
+# Setup the base petsc env
+ENV PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH"
+ENV PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
+
+# Clone ABLATE
+WORKDIR /
+run git clone ${ABLATE_URL} /ablate
+
+
+# Test 32-bit opt
+run mkdir /arch-opt
+ENV PETSC_ARCH=arch-opt
+run cmake -DCMAKE_BUILD_TYPE=Release -S ablate -B arch-opt
+run make -C arch-opt -j $(nproc)
+
+# Run tests
+WORKDIR arch-opt
+run bash -c "make format-check && ctest"
+
+# Test 32-bit debug
+WORKDIR /
+run mkdir /arch-debug
+ENV PETSC_ARCH=arch-debug
+run cmake -DCMAKE_BUILD_TYPE=Debug -S ablate -B arch-debug
+run make -C arch-debug -j $(nproc)
+
+# Run tests
+WORKDIR arch-debug
+run bash -c "make format-check && ctest"
+
+# Test 64-bit opt
+WORKDIR /
+run mkdir /arch-opt-64
+ENV PETSC_ARCH=arch-opt-64
+run cmake -DCMAKE_BUILD_TYPE=Release -S ablate -B arch-opt-64
+run make -C arch-opt-64 -j $(nproc)
+
+# Run tests
+WORKDIR arch-opt-64
+run bash -c "make format-check && ctest"
+
+# Test 64-bit debug
+WORKDIR /
+run mkdir /arch-debug-64
+ENV PETSC_ARCH=arch-debug-64
+run cmake -DCMAKE_BUILD_TYPE=Debug -S ablate -B arch-debug-64
+run make -C arch-debug-64 -j $(nproc)
+
+# Run tests
+WORKDIR arch-debug-64
+run bash -c "make format-check && ctest"
+
+
