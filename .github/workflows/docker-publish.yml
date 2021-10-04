@@ -1,6 +1,10 @@
 name: Docker-Publish
 
 on:
+  schedule:
+    # Recompile at 00:15 UTC on Sundays
+    - cron: '15 0 * * 0'
+    
   push:
     # Publish `main` as Docker `latest` image.
     branches:
