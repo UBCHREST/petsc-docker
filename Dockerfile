@@ -1,12 +1,12 @@
 FROM ubuntu:hirsute
 
 # Define Constants
+ENV PETSC_URL https://gitlab.com/petsc/petsc.gitaa
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
 
 # Install dependencies
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update
-RUN apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils libtool clang-format pkg-config libpng-dev
+RUN apt-get update && apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils libtool clang-format pkg-config libpng-dev
 
 # Clone PETSc
 WORKDIR /
@@ -44,43 +44,51 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 # Configure & Build PETSc a 32-bit indices Debug Build
 ENV PETSC_ARCH=arch-debug
 run ./configure \
-	PETSC_ARCH=arch-debug \
 	--with-64-bit-indices=0 \
 	--with-debugging=1 \
-	${PETSC_SETUP_ARGS}
+  --prefix=/petsc-install/${PETSC_ARCH} \
+	${PETSC_SETUP_ARGS} && \
+  make PETSC_DIR=/petsc all install && \
+  rm -rf /petsc/${PETSC_ARCH} && \
+  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
-run make PETSC_DIR=/petsc PETSC_ARCH=arch-debug all check
 
 # Configure & Build PETSc a 32-bit indices Release Build
 ENV PETSC_ARCH=arch-opt
 run ./configure \
-	PETSC_ARCH=arch-opt \
 	--with-64-bit-indices=0 \
-	--with-debugging=0 \
-	${PETSC_SETUP_ARGS}
+	--with-debugging=1 \
+  --prefix=/petsc-install/${PETSC_ARCH} \
+	${PETSC_SETUP_ARGS} && \
+  make PETSC_DIR=/petsc all install && \
+  rm -rf /petsc/${PETSC_ARCH} && \
+  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
-run make PETSC_DIR=/petsc PETSC_ARCH=arch-opt all check
+
 
 # Configure & Build PETSc a 64-bit indices Debug Build
-ENV PETSC_ARCH=arch-debug
+ENV PETSC_ARCH=arch-debug-64
 run ./configure \
-	PETSC_ARCH=arch-debug-64 \
-	--with-64-bit-indices=1 \
+	--with-64-bit-indices=0 \
 	--with-debugging=1 \
-	${PETSC_SETUP_ARGS}
+  --prefix=/petsc-install/${PETSC_ARCH} \
+	${PETSC_SETUP_ARGS} && \
+  make PETSC_DIR=/petsc all install && \
+  rm -rf /petsc/${PETSC_ARCH} && \
+  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
-run make PETSC_DIR=/petsc PETSC_ARCH=arch-debug-64 all check
 
 # Configure & Build PETSc a 64-bit indices Release Build
-ENV PETSC_ARCH=arch-opt
+ENV PETSC_ARCH=arch-opt-64
 run ./configure \
-	PETSC_ARCH=arch-opt-64 \
-	--with-64-bit-indices=1 \
-	--with-debugging=0 \
-	${PETSC_SETUP_ARGS}
+	--with-64-bit-indices=0 \
+	--with-debugging=1 \
+  --prefix=/petsc-install/${PETSC_ARCH} \
+	${PETSC_SETUP_ARGS} && \
+  make PETSC_DIR=/petsc all install && \
+  rm -rf /petsc/${PETSC_ARCH} && \
+  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
-run make PETSC_DIR=/petsc PETSC_ARCH=arch-opt-64 all check
+ENV PETSC_DIR=/petsc-install
 
 
-# Set default values
-ENV PETSC_DIR=/petsc
