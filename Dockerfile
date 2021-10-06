@@ -57,7 +57,7 @@ run ./configure \
 ENV PETSC_ARCH=arch-opt
 run ./configure \
 	--with-64-bit-indices=0 \
-	--with-debugging=1 \
+	--with-debugging=0 \
   --prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
   make PETSC_DIR=/petsc all install && \
@@ -69,7 +69,7 @@ run ./configure \
 # Configure & Build PETSc a 64-bit indices Debug Build
 ENV PETSC_ARCH=arch-debug-64
 run ./configure \
-	--with-64-bit-indices=0 \
+	--with-64-bit-indices=1 \
 	--with-debugging=1 \
   --prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
@@ -81,8 +81,8 @@ run ./configure \
 # Configure & Build PETSc a 64-bit indices Release Build
 ENV PETSC_ARCH=arch-opt-64
 run ./configure \
-	--with-64-bit-indices=0 \
-	--with-debugging=1 \
+	--with-64-bit-indices=1 \
+	--with-debugging=0 \
   --prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
   make PETSC_DIR=/petsc all install && \
