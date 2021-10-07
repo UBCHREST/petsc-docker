@@ -26,20 +26,6 @@ run mkdir ${PETSC_ARCH} && \
 WORKDIR ${PETSC_ARCH}
 run bash -c "make format-check && ctest"
 
-# Test 32-bit debug
-WORKDIR /
-ENV PETSC_ARCH=arch-debug \
-  PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH" \
-	PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
-
-run mkdir ${PETSC_ARCH} && \
-	cmake -DCMAKE_BUILD_TYPE=Debug -S ablate -B ${PETSC_ARCH} && \
-	make -C ${PETSC_ARCH} -j $(nproc)
-
-# Run tests
-WORKDIR ${PETSC_ARCH}
-run bash -c "make format-check && ctest"
-
 # Test 64-bit opt
 WORKDIR /
 ENV PETSC_ARCH=arch-opt-64 \
@@ -53,19 +39,3 @@ run mkdir ${PETSC_ARCH} && \
 # Run tests
 WORKDIR ${PETSC_ARCH}
 run bash -c "make format-check && ctest"
-
-# Test 64-bit debug
-WORKDIR /
-ENV PETSC_ARCH=arch-debug-64 \
-  PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH" \
-	PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
-
-run mkdir ${PETSC_ARCH} && \
-	cmake -DCMAKE_BUILD_TYPE=Debug -S ablate -B ${PETSC_ARCH} && \
-	make -C ${PETSC_ARCH} -j $(nproc)
-
-# Run tests
-WORKDIR ${PETSC_ARCH}
-run bash -c "make format-check && ctest"
-
-
