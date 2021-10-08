@@ -4,5 +4,10 @@ PETSc Docker Build
 ## To build locally
 
 ```
-docker build -t petsc_image .
+docker build . --file Dockerfile --tag=petsc-build
 ```
+
+## To test against Ablate
+
+```
+docker build . --file DockerAblateFile --tabe ablate-build
