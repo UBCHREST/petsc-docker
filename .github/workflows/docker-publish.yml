@@ -52,7 +52,7 @@ jobs:
         run: docker build . --file DockerAblateFile --tag ablate-build
         
       - name: determine version
-        run: VERSION=$(docker run --rm petsc-build git rev-parse --short HEAD)
+        run: VERSION=$(docker run --rm $IMAGE_NAME git rev-parse --short HEAD)
 
       - name: Log into registry
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
