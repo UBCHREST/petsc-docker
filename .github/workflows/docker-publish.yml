@@ -51,8 +51,8 @@ jobs:
       - name: Test ablate
         run: docker build . --file DockerAblateFile --tag ablate-build
         
-      - name: determine version
-        run: VERSION=$(docker run --rm $IMAGE_NAME git rev-parse --short HEAD)
+      - name: Get the git commit ID from the build file
+        run: echo "VERSION=$(docker run --rm $IMAGE_NAME git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Log into registry
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
