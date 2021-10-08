@@ -1,6 +1,10 @@
 name: Docker-Publish
 
 on:
+  schedule:
+    # Recompile at 00:15 UTC on Sundays
+    - cron: '15 0 * * 0'
+    
   push:
     # Publish `main` as Docker `latest` image.
     branches:
@@ -29,28 +33,26 @@ jobs:
       
       - name: Run tests
         run: |
-            if [ -f docker-compose.test.yml ]; then
-                docker-compose --file docker-compose.test.yml build
-                docker-compose --file docker-compose.test.yml run sut
-            else
-                docker build . --file Dockerfile
-            fi
+            docker build . --file Dockerfile --tag $IMAGE_NAME
+            docker build . --file DockerAblateFile --tag ablate_image
 
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'schedule'
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: determine version
-        run: |
-            echo "VERSION=$(awk '/ENV PETSC_VERSION/ {print $NF}' Dockerfile)" >> $GITHUB_ENV
-
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME            
+      
+      - name: Test ablate
+        run: docker build . --file DockerAblateFile --tag ablate-build
+        
+      - name: determine version
+        run: VERSION=$(docker run --rm petsc-build git rev-parse --short HEAD)
 
       - name: Log into registry
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin

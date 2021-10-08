@@ -1,0 +1,41 @@
+FROM petsc-build:latest
+
+# Install dependencies
+RUN apt-get update && apt-get install -y clang-format
+
+# Define location of ABLATE
+#ENV ABLATE_URL https://github.com/UBCHREST/ablate.git
+ENV ABLATE_URL=https://github.com/mmcgurn/ablate.git
+
+# Clone ABLATE
+WORKDIR /
+run git clone ${ABLATE_URL} /ablate && cd /ablate && git checkout mcgurn/petsc3.16
+
+
+# Test 32-bit opt
+WORKDIR /
+ENV PETSC_ARCH=arch-opt \
+  PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH" \
+	PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
+
+run mkdir ${PETSC_ARCH} && \
+	cmake -DCMAKE_BUILD_TYPE=Release -S ablate -B ${PETSC_ARCH} && \
+	make -C ${PETSC_ARCH} -j $(nproc)
+
+# Run tests
+WORKDIR ${PETSC_ARCH}
+run bash -c "make format-check && ctest"
+
+# Test 64-bit opt
+WORKDIR /
+ENV PETSC_ARCH=arch-opt-64 \
+  PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH" \
+	PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
+
+run mkdir ${PETSC_ARCH} && \
+	cmake -DCMAKE_BUILD_TYPE=Release -S ablate -B ${PETSC_ARCH} && \
+	make -C ${PETSC_ARCH} -j $(nproc)
+
+# Run tests
+WORKDIR ${PETSC_ARCH}
+run bash -c "make format-check && ctest"
