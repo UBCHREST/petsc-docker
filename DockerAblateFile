@@ -4,12 +4,11 @@ FROM petsc-build:latest
 RUN apt-get update && apt-get install -y clang-format
 
 # Define location of ABLATE
-#ENV ABLATE_URL https://github.com/UBCHREST/ablate.git
-ENV ABLATE_URL=https://github.com/mmcgurn/ablate.git
+ENV ABLATE_URL https://github.com/UBCHREST/ablate.git
 
 # Clone ABLATE
 WORKDIR /
-run git clone ${ABLATE_URL} /ablate && cd /ablate && git checkout mcgurn/petsc3.16
+run git clone ${ABLATE_URL} /ablate
 
 
 # Test 32-bit opt
