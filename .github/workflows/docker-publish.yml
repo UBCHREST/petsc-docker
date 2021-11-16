@@ -15,7 +15,7 @@ on:
       - v*
 
   workflow_dispatch:
-    # Allow this event to be triggered
+    # Allow this event to be triggered in the github ui
 
   # Run tests for any PRs.
   pull_request:
