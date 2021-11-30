@@ -43,7 +43,7 @@ jobs:
   # See also https://docs.docker.com/docker-hub/builds/
   push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'schedule'
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v2
@@ -52,6 +52,7 @@ jobs:
         run: docker build . --file Dockerfile --tag $IMAGE_NAME            
       
       - name: Test ablate
+        if: github.event_name != 'workflow_dispatch'
         run: docker build . --file DockerAblateFile --tag ablate-build
         
       - name: Get the git commit ID from the build file
