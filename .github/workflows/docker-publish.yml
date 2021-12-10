@@ -34,9 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
+      - name: Set up docker
+        run: docker buildx create --name builder --use
+
       - name: Run tests
         run: |
-            docker build . --file Dockerfile --tag $IMAGE_NAME
+            docker buildx build . --file Dockerfile --tag $IMAGE_NAME --load           
             docker build . --file DockerAblateFile --tag ablate_image
 
   # Push image to GitHub Packages.
