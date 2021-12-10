@@ -21,8 +21,8 @@ on:
   pull_request:
 
 env:
-  # TODO: Change variable to your image's name.
   IMAGE_NAME: petsc-build
+  PLATFORMS: linux/arm64,linux/amd64
 
 jobs:
   # Run tests.
@@ -48,8 +48,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up docker
+        run: docker buildx create --name builder --use
+
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME            
+        run: docker buildx build . --file Dockerfile --tag $IMAGE_NAME --load           
       
       - name: Test ablate
         if: github.event_name != 'workflow_dispatch'
@@ -71,11 +74,9 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag $IMAGE_NAME $IMAGE_ID:latest
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push --all-tags $IMAGE_ID
+          docker buildx build . --file Dockerfile --platform ${PLATFORMS} --tag $IMAGE_ID:latest --tag $IMAGE_ID:$VERSION --push
+
    
-          
       - name: set version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v5
