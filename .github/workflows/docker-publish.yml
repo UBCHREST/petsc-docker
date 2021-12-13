@@ -32,6 +32,11 @@ jobs:
     if: github.event_name == 'pull_request'
 
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@master
+        with:
+          platforms: all
+          
       - uses: actions/checkout@v2
       
       - name: Set up docker
@@ -39,7 +44,7 @@ jobs:
 
       - name: Run tests
         run: |
-            docker buildx build . --file Dockerfile --tag $IMAGE_NAME --load           
+            docker buildx build . --file Dockerfile  --platform ${PLATFORMS} --tag $IMAGE_NAME       
             docker build . --file DockerAblateFile --tag ablate_image
 
   # Push image to GitHub Packages.
@@ -49,6 +54,11 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@master
+        with:
+          platforms: all
+          
       - uses: actions/checkout@v2
 
       - name: Set up docker
