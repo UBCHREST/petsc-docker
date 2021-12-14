@@ -1,8 +1,10 @@
 FROM ubuntu:hirsute
 
 # Define Constants
-ENV PETSC_URL https://gitlab.com/petsc/petsc.gitaa
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
+
+# Pass in required arguments
+ARG PETSC_BUILD_COMMIT=main
 
 # Install dependencies
 ENV DEBIAN_FRONTEND=noninteractive
@@ -12,7 +14,7 @@ RUN apt-get update && apt-get -y install build-essential gfortran git cmake auto
 WORKDIR /
 RUN git clone ${PETSC_URL} /petsc
 WORKDIR /petsc
-RUN git checkout main
+RUN git checkout $PETSC_BUILD_COMMIT
 
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=gcc \
