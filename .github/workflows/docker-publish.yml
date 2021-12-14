@@ -124,9 +124,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
 
-      - name: Run tests
-        run: |
-        - name: Build image
+      - name: Build image
         run: |
           # define the image id
           PLATFORM_NAME=$(echo ${{ matrix.platform }} | tr -d / ')
