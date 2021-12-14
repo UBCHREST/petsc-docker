@@ -70,7 +70,7 @@ jobs:
       - name: Build image
         run: |
           # define the image id
-          PLATFORM_NAME=$(echo ${{ matrix.platform }} | tr -d / ')
+          PLATFORM_NAME=$(echo ${{ matrix.platform }} | tr -d /)
           IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-$PLATFORM_NAME
 
           # Change all uppercase to lowercase
@@ -125,7 +125,7 @@ jobs:
       - name: Build image
         run: |
           # define the image id
-          PLATFORM_NAME=$(echo ${{ matrix.platform }} | tr -d / ')
+          PLATFORM_NAME=$(echo ${{ matrix.platform }} | tr -d /)
           IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-$PLATFORM_NAME
 
           # Change all uppercase to lowercase
