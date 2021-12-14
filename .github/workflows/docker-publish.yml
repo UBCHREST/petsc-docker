@@ -84,11 +84,11 @@ jobs:
           docker buildx build .\
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
-            --platform ${{ matrix.platform }}
-            --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}}
-            --load
-            --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}}
-            --file Dockerfile    
+            --platform ${{ matrix.platform }} \
+            --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
+            --load \
+            --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
+            --file Dockerfile \
      
 
   # Run tests.
@@ -121,8 +121,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-
-      - name: Build image
+      - name: Run Test image
         run: |
           # define the image id
           PLATFORM_NAME=$(echo ${{ matrix.platform }} | tr -d /)
@@ -139,7 +138,7 @@ jobs:
           docker buildx build .\
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
-            --platform ${{ matrix.platform }}
-            --build-arg PETSC_BASE_IMAGE=$IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}}
+            --platform ${{ matrix.platform }} \
+            --build-arg PETSC_BASE_IMAGE=$IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --file DockerAblateFile    
           
