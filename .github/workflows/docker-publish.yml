@@ -22,7 +22,7 @@ on:
 
 env:
   IMAGE_NAME: petsc-build
-  PLATFORM: [linux/arm64,linux/amd64]
+
 jobs:
   get-version:
     runs-on: ubuntu-latest 
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ${{ env.PLATFORM}}
+        platform: [linux/arm64,linux/amd64]
 
     steps:
       - name: Set up QEMU
@@ -101,7 +101,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch'
     strategy:
       matrix:
-        platform: ${{ env.PLATFORM}}
+        platform: [linux/arm64,linux/amd64]
 
     steps:
       - name: Set up QEMU
