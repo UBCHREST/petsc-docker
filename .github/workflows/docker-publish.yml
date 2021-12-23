@@ -127,7 +127,7 @@ jobs:
   # Tag the image as latest and the version in the repo
   tag:
     needs: [get-version,test]
-    if: ${{needs.test.result == 'success" || needs.test.result == 'skipped'}}
+    if: ${{needs.test.result == 'success' || needs.test.result == 'skipped'}}
     runs-on: ARM64
     steps:
       - name: Set up QEMU
