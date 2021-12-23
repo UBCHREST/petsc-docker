@@ -25,7 +25,7 @@ env:
 
 jobs:
   get-version:
-    runs-on: ubuntu-latest 
+    runs-on: ARM64 
     steps:
     - id: version
       run: |
@@ -40,7 +40,7 @@ jobs:
   # Push image to GitHub Packages.
   build:
     needs: get-version
-    runs-on: ubuntu-latest
+    runs-on: ARM64
     strategy:
       matrix:
         platform: [linux/arm64,linux/amd64]
@@ -95,7 +95,7 @@ jobs:
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
     needs: [get-version, build]
-    runs-on: ubuntu-latest
+    runs-on: ARM64
     if: github.event_name != 'workflow_dispatch'
     strategy:
       matrix:
