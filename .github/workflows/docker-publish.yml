@@ -80,7 +80,7 @@ jobs:
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
-            --platform $${env.PLATFORMS}} \
+            --platform ${{env.PLATFORMS}} \
             --push \
             --file Dockerfile 
 
@@ -169,6 +169,6 @@ jobs:
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --tag $IMAGE_ID:latest \
-            --platform $${env.PLATFORMS}} \
+            --platform ${{env.PLATFORMS}} \
             --push \
             --file Dockerfile 
