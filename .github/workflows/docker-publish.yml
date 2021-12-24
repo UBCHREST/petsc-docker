@@ -79,15 +79,14 @@ jobs:
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
+            --load \
             --file Dockerfile 
 
           # List local images
           docker image ls
 
           # Build the image
-          docker buildx build .\
-            --cache-from "type=local,src=/tmp/.buildx-cache" \
-            --cache-to "type=local,dest=/tmp/.buildx-cache" \
+          docker build .\
             --build-arg PETSC_BASE_IMAGE=$IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --file DockerAblateFile    
 
