@@ -80,7 +80,10 @@ jobs:
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
             --load \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
-            --file Dockerfile \
+            --file Dockerfile 
+
+          # List local images
+          docker image ls
 
           # Build the image
           docker buildx build .\
