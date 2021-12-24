@@ -65,14 +65,14 @@ jobs:
       - name: Build image
         run: |
           # define the image id
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{env.RUNNER_ARCH}}
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{matrix.arch}}
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
-          echo ARCH=${{env.RUNNER_ARCH}}
+          echo ARCH=${{matrix.arch}}
           
           # Build the image
           docker buildx build .\
@@ -112,14 +112,14 @@ jobs:
       - name: Run Test image
         run: |
           # define the image id
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{env.RUNNER_ARCH}}
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{matrix.arch}}
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
-          echo ARCH=${{env.RUNNER_ARCH}}
+          echo ARCH=${{matrix.arch}}
           
           # Build the image
           docker buildx build .\
