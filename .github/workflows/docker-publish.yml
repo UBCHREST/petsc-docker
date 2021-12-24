@@ -92,7 +92,7 @@ jobs:
   # Push image to GitHub Packages.
   build:
     needs: [get-version, test]
-	if: ${{!(contains(needs.*.result, 'failure'))}} && github.event_name != 'pull_request'
+	if: ${{!(contains(needs.*.result, 'failure')) && github.event_name != 'pull_request'}} 
     strategy:
       matrix:
         arch: [ARM64, X64]
