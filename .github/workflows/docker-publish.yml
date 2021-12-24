@@ -61,6 +61,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Log into registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
 
       - name: Build image
         run: |
@@ -108,6 +110,9 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+            
+      - name: Log into registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
 
       - name: Run Test image
         run: |
@@ -148,6 +153,9 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+            
+      - name: Log into registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
 
       - name: Run Test image
         run: |
