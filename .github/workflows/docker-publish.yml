@@ -22,68 +22,166 @@ on:
 
 env:
   IMAGE_NAME: petsc-build
-  PLATFORMS: linux/arm64,linux/amd64
 
 jobs:
+  get-version:
+    runs-on: ubuntu-latest 
+    steps:
+    - id: version
+      run: |
+        # Get the latest version of petsc 
+        export PETSC_COMMIT=$(git ls-remote https://gitlab.com/petsc/petsc.git HEAD | awk '{ print substr($1, 1, 8)}'D)
+        echo "::set-output name=petsc_commit::${PETSC_COMMIT}"
+        
+    outputs:
+      petsc_commit: ${{ steps.version.outputs.petsc_commit }}
+      
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    needs: [get-version]
+    strategy:
+      matrix:
+        arch: [ARM64, X64]
+    runs-on: ${{ matrix.arch }}
+    if: github.event_name != 'workflow_dispatch'
 
     steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1            
+          
       - uses: actions/checkout@v2
       
-      - name: Set up docker
-        run: docker buildx create --name builder --use
-
-      - name: Run tests
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+            
+      - name: Run Test image
         run: |
-            docker buildx build . --file Dockerfile --tag $IMAGE_NAME --load           
-            docker build . --file DockerAblateFile --tag ablate_image
-
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
-  push:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up docker
-        run: docker buildx create --name builder --use
-
-      - name: Build image
-        run: docker buildx build . --file Dockerfile --tag $IMAGE_NAME --load           
-      
-      - name: Test ablate
-        if: github.event_name != 'workflow_dispatch'
-        run: docker build . --file DockerAblateFile --tag ablate-build
-        
-      - name: Get the git commit ID from the build file
-        run: echo "VERSION=$(docker run --rm $IMAGE_NAME git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-      - name: Log into registry
-        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
-
-      - name: Push image
-        run: |
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+          # define the image id
+          IMAGE_ID=$IMAGE_NAME-${{matrix.arch}}
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
+          echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
+          echo ARCH=${{matrix.arch}}
+          
+          # build the petsc-image
+          docker buildx build .\
+            --cache-from "type=local,src=/tmp/.buildx-cache" \
+            --cache-to "type=local,dest=/tmp/.buildx-cache" \
+            --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
+            --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
+            --load \
+            --file Dockerfile 
 
-          docker buildx build . --file Dockerfile --platform ${PLATFORMS} --tag $IMAGE_ID:latest --tag $IMAGE_ID:$VERSION --push
+          # List local images
+          docker image ls
 
-   
-      - name: set version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v5
+          # Build the image
+          docker build .\
+            --build-arg PETSC_BASE_IMAGE=$IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
+            --file DockerAblateFile    
+
+  # Push image to GitHub Packages.
+  build:
+    needs: [get-version, test]
+    if: ${{!(contains(needs.*.result, 'failure')) && github.event_name != 'pull_request'}} 
+    strategy:
+      matrix:
+        arch: [ARM64, X64]
+    runs-on: ${{ matrix.arch }}
+
+    steps:          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1    
+          
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{env.VERSION}}
-          tag_prefix: ""
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Log into registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+
+      - name: Build image
+        run: |
+          # define the image id
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{matrix.arch}}
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
+          echo ARCH=${{matrix.arch}}
+          
+          # Build the image
+          docker buildx build .\
+            --cache-from "type=local,src=/tmp/.buildx-cache" \
+            --cache-to "type=local,dest=/tmp/.buildx-cache" \
+            --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
+            --push \
+            --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
+            --file Dockerfile \
+     
+
+  # Push the latest tag if everything build
+  push-latest:
+    needs: [get-version, build]
+    runs-on: ubuntu-latest 
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1            
+          
+      - uses: actions/checkout@v2
+      
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+            
+      - name: Log into registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+
+      - name: Run Test image
+        run: |
+          # Define the base image id
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # build a manifest file for this version
+          docker manifest create \
+            $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
+            --amend $IMAGE_ID-arm64:${{ needs.get-version.outputs.petsc_commit}} \
+            --amend $IMAGE_ID-x64:${{ needs.get-version.outputs.petsc_commit}} 
+
+          # push
+          docker manifest push $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}}
+
+
+          # tag as latest
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+  
+                    
