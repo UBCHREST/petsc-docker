@@ -64,7 +64,7 @@ jobs:
       - name: Run Test image
         run: |
           # define the image id
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{matrix.arch}}
+          IMAGE_ID=$IMAGE_NAME-${{matrix.arch}}
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
