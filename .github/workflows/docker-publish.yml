@@ -22,11 +22,10 @@ on:
 
 env:
   IMAGE_NAME: petsc-build
-  PLATFORMS: linux/arm64,linux/amd64
 
 jobs:
   get-version:
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ubuntu-latest 
     steps:
     - id: version
       run: |
@@ -36,20 +35,20 @@ jobs:
         
     outputs:
       petsc_commit: ${{ steps.version.outputs.petsc_commit }}
-
+      
+  
   # Push image to GitHub Packages.
   build:
     needs: get-version
-    runs-on: ARM64
-    steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@master
-        with:
-          platforms: arm64,amd64
+    strategy:
+      matrix:
+        arch: [ARM64, X64]
+    runs-on: ${{ matrix.arch }}
 
+    steps:          
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
+        uses: docker/setup-buildx-action@v1    
+          
       - name: checkout code
         uses: actions/checkout@v2
 
@@ -62,34 +61,39 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+
       - name: Build image
         run: |
           # define the image id
-          PLATFORM_NAME=$(echo ${{ matrix.platform }} | tr -d /)
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{env.RUNNER_ARCH}}
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
-
+          echo ARCH=${{env.RUNNER_ARCH}}
+          
           # Build the image
           docker buildx build .\
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
-            --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
-            --platform ${{env.PLATFORMS}} \
             --push \
-            --file Dockerfile 
+            --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
+            --file Dockerfile \
+     
 
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
     needs: [get-version, build]
-    runs-on: ARM64
+    strategy:
+      matrix:
+        arch: [ARM64, X64]
+    runs-on: ${{ matrix.arch }}
     if: github.event_name != 'workflow_dispatch'
+
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1            
@@ -108,67 +112,19 @@ jobs:
       - name: Run Test image
         run: |
           # define the image id
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{env.RUNNER_ARCH}}
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
+          echo ARCH=${{env.RUNNER_ARCH}}
           
           # Build the image
           docker buildx build .\
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
             --build-arg PETSC_BASE_IMAGE=$IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
-            --file DockerAblateFile
+            --file DockerAblateFile    
           
-
-  # Tag the image as latest and the version in the repo
-  tag:
-    needs: [get-version,test]
-    if: ${{needs.test.result == 'success' || needs.test.result == 'skipped'}}
-    runs-on: ARM64
-    steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@master
-        with:
-          platforms: arm64,amd64
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: checkout code
-        uses: actions/checkout@v2
-
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        id: cache
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Build image
-        run: |
-          # define the image id
-          PLATFORM_NAME=$(echo ${{ matrix.platform }} | tr -d /)
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
-          
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
-          
-          # Build the image
-          docker buildx build .\
-            --cache-from "type=local,src=/tmp/.buildx-cache" \
-            --cache-to "type=local,dest=/tmp/.buildx-cache" \
-            --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
-            --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
-            --tag $IMAGE_ID:latest \
-            --platform ${{env.PLATFORMS}} \
-            --push \
-            --file Dockerfile 
