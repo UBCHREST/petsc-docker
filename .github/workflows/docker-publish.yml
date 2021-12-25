@@ -42,7 +42,7 @@ jobs:
     needs: [get-version]
     strategy:
       matrix:
-        arch: [ARM64, X64]
+        arch: [ARM64, AMD64]
     runs-on: ${{ matrix.arch }}
     if: github.event_name != 'workflow_dispatch'
 
@@ -96,7 +96,7 @@ jobs:
     if: ${{!(contains(needs.*.result, 'failure')) && github.event_name != 'pull_request'}} 
     strategy:
       matrix:
-        arch: [ARM64, X64]
+        arch: [ARM64, AMD64]
     runs-on: ${{ matrix.arch }}
 
     steps:          
@@ -174,7 +174,7 @@ jobs:
           docker manifest create \
             $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --amend $IMAGE_ID-arm64:${{ needs.get-version.outputs.petsc_commit}} \
-            --amend $IMAGE_ID-x64:${{ needs.get-version.outputs.petsc_commit}} 
+            --amend $IMAGE_ID-amd64:${{ needs.get-version.outputs.petsc_commit}} 
 
           # push
           docker manifest push $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}}
