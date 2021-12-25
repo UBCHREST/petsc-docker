@@ -42,7 +42,7 @@ jobs:
     needs: [get-version]
     strategy:
       matrix:
-        arch: [ARM64, AMD64]
+        arch: [ARM64, ubuntu-latest]
     runs-on: ${{ matrix.arch }}
     if: github.event_name != 'workflow_dispatch'
 
