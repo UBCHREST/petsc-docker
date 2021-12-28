@@ -181,7 +181,7 @@ jobs:
 
           # tag as latest
           docker manifest create \
-            $IMAGE_ID:$latest \
+            $IMAGE_ID:latest \
             --amend $IMAGE_ID-arm64:${{ needs.get-version.outputs.petsc_commit}} \
             --amend $IMAGE_ID-amd64:${{ needs.get-version.outputs.petsc_commit}} 
             
