@@ -39,7 +39,7 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--download-triangle \
 	--download-slepc \
 	--download-tchem=https://github.com/UBCHREST/tchemv1.git \
-	--download-tchem-commit=0354366 \
+	--download-tchem-commit=5877d14 \
 	--download-opencascade \
 	--with-libpng \
 	--download-zlib
