@@ -44,8 +44,19 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--with-libpng \
 	--download-zlib
 
+# Configure & Build PETSc a 32-bit indices Debug Build
+ENV PETSC_ARCH=arch-ablate-debug
+run ./configure \
+	--with-64-bit-indices=0 \
+	--with-debugging=1 \
+  --prefix=/petsc-install/${PETSC_ARCH} \
+	${PETSC_SETUP_ARGS} && \
+  make PETSC_DIR=/petsc all install && \
+  rm -rf /petsc/${PETSC_ARCH} && \
+  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
+
 # Configure & Build PETSc a 32-bit indices Release Build
-ENV PETSC_ARCH=arch-opt
+ENV PETSC_ARCH=arch-ablate-opt
 run ./configure \
 	--with-64-bit-indices=0 \
 	--with-debugging=0 \
@@ -56,7 +67,7 @@ run ./configure \
   make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
 # Configure & Build PETSc a 64-bit indices Release Build
-ENV PETSC_ARCH=arch-opt-64
+ENV PETSC_ARCH=arch-ablate-opt-64
 run ./configure \
 	--with-64-bit-indices=1 \
 	--with-debugging=0 \
