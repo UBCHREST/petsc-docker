@@ -14,7 +14,7 @@ run git clone ${ABLATE_URL} /ablate
 
 # Test 32-bit opt
 WORKDIR /
-ENV PETSC_ARCH=arch-opt \
+ENV PETSC_ARCH=arch-ablate-opt \
   PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH" \
 	PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 
@@ -28,7 +28,7 @@ run bash -c "make format-check && ctest"
 
 # Test 64-bit opt
 WORKDIR /
-ENV PETSC_ARCH=arch-opt-64 \
+ENV PETSC_ARCH=arch-ablate-opt-64 \
   PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH" \
 	PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 
