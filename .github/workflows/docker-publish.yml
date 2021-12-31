@@ -179,5 +179,16 @@ jobs:
           # push
           docker manifest push $IMAGE_ID:latest
 
-  
+  trigger-event:
+    needs: push-latest
+    runs-on: ubuntu-latest 
+    steps:
+      - name: Repository Dispatch to rebuild ABLATE dependcies
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          repository: UBCHREST/ablate
+          token: ${{ secrets.TRIGGER_PAT }}
+          event-type: rebuild-dependencies
+          
+          
                     
