@@ -44,7 +44,6 @@ jobs:
       matrix:
         config: [{runson: ARM64, arch: ARM64}, {runson: ubuntu-latest, arch: AMD64}]
     runs-on: ${{ matrix.config.runson }}
-    if: github.event_name != 'workflow_dispatch'
 
     steps:
       - name: Set up Docker Buildx
@@ -62,6 +61,8 @@ jobs:
             ${{ matrix.config.arch }}-${{ runner.os }}-buildx-
             
       - name: Run Test image
+        # don't run the tests if this was manually pushed
+        if: github.event_name != 'workflow_dispatch'
         run: |
           # define the image id
           IMAGE_ID=$IMAGE_NAME-${{matrix.config.arch}}
@@ -93,7 +94,7 @@ jobs:
   # Push image to GitHub Packages.
   build:
     needs: [get-version, test]
-    if: ${{!(contains(needs.*.result, 'failure')) && github.event_name != 'pull_request'}} 
+    if: github.event_name != 'pull_request'
     strategy:
       matrix:
         config: [{runson: ARM64, arch: ARM64}, {runson: ubuntu-latest, arch: AMD64}]
