@@ -98,7 +98,7 @@ jobs:
     if: github.event_name != 'pull_request'
     strategy:
       matrix:
-        arch: [ { runson: ARM64, id: -ARM64 }, { runson: ubuntu-latest, id: -AMD64 } ]
+        arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
         indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
 
