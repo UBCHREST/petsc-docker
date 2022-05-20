@@ -4,7 +4,7 @@ on:
   schedule:
     # Recompile at 00:15 UTC on Sundays
     - cron: '15 0 * * 0'
-    
+
   push:
     # Publish `main` as Docker `latest` image.
     branches:
@@ -15,7 +15,7 @@ on:
       - v*
 
   workflow_dispatch:
-    # Allow this event to be triggered in the github ui
+  # Allow this event to be triggered in the github ui
 
   # Run tests for any PRs.
   pull_request:
@@ -25,60 +25,62 @@ env:
 
 jobs:
   get-version:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     steps:
-    - id: version
-      run: |
-        # Get the latest version of petsc 
-        export PETSC_COMMIT=$(git ls-remote https://gitlab.com/petsc/petsc.git HEAD | awk '{ print substr($1, 1, 8)}'D)
-        echo "::set-output name=petsc_commit::${PETSC_COMMIT}"
-        
+      - id: version
+        run: |
+          # Get the latest version of petsc 
+          export PETSC_COMMIT=$(git ls-remote https://gitlab.com/petsc/petsc.git HEAD | awk '{ print substr($1, 1, 8)}'D)
+          echo "::set-output name=petsc_commit::${PETSC_COMMIT}"
+
     outputs:
       petsc_commit: ${{ steps.version.outputs.petsc_commit }}
-      
+
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
-    needs: [get-version]
+    needs: [ get-version ]
     strategy:
       matrix:
-        config: [{runson: ARM64, arch: ARM64}, {runson: ubuntu-latest, arch: AMD64}]
-    runs-on: ${{ matrix.config.runson }}
+        arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
+        compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
+        indices: [ { 64bit: 0, id: "" },  { 64bit: 1, id: "-64bitindex" } ]
+
+    runs-on: ${{ matrix.arch.runson }}
+    if: github.event_name != 'workflow_dispatch'
 
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1            
-          
+        uses: docker/setup-buildx-action@v1
+
       - uses: actions/checkout@v2
-      
+
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
         with:
           path: /tmp/.buildx-cache
-          key: ${{ matrix.config.arch }}-${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}${{ matrix.compiler.id }}${{ matrix.indices.id }}-buildx-${{ github.sha }}${{ matrix.arch.id }}
           restore-keys: |
-            ${{ matrix.config.arch }}-${{ runner.os }}-buildx-
-            
+            ${{ runner.os }}${{ matrix.compiler.id }}${{ matrix.indices.id }}${{ matrix.arch.id }}-buildx-
+
       - name: Run Test image
         # don't run the tests if this was manually pushed
         if: github.event_name != 'workflow_dispatch'
         run: |
           # define the image id
-          IMAGE_ID=$IMAGE_NAME-${{matrix.config.arch}}
-
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
+          IMAGE_ID=$IMAGE_NAME${{matrix.compiler.id}}${{matrix.indices.id}}${{matrix.arch.id}}
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
-          echo ARCH=${{matrix.config.arch}}
           
           # build the petsc-image
           docker buildx build .\
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
+            --build-arg CC=${{matrix.compiler.cc}}} \
+            --build-arg CXX=${{matrix.compiler.cxx}} \
+            --build-arg 64BitIndex=${{matrix.indices.64bit}} \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --load \
             --file Dockerfile 
@@ -97,13 +99,16 @@ jobs:
     if: github.event_name != 'pull_request'
     strategy:
       matrix:
-        config: [{runson: ARM64, arch: ARM64}, {runson: ubuntu-latest, arch: AMD64}]
-    runs-on: ${{ matrix.config.runson }}
+        arch: [ { runson: ARM64, id: -ARM64 }, { runson: ubuntu-latest, id: -AMD64 } ]
+        compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
+        indices: [ { 64bit: 0, id: "" },  { 64bit: 1, id: "-64bitindex" } ]
 
-    steps:          
+    runs-on: ${{ matrix.arch.runson }}
+
+    steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1    
-          
+        uses: docker/setup-buildx-action@v1
+
       - name: checkout code
         uses: actions/checkout@v2
 
@@ -112,9 +117,9 @@ jobs:
         id: cache
         with:
           path: /tmp/.buildx-cache
-          key: ${{ matrix.config.arch }}-${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}${{ matrix.compiler.id }}${{ matrix.indices.id }}-buildx-${{ github.sha }}${{ matrix.arch.id }}
           restore-keys: |
-            ${{ matrix.config.arch }}-${{ runner.os }}-buildx-
+            ${{ runner.os }}${{ matrix.compiler.id }}${{ matrix.indices.id }}${{ matrix.arch.id }}-buildx-
 
       - name: Log into registry
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
@@ -122,44 +127,48 @@ jobs:
       - name: Build image
         run: |
           # define the image id
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME-${{matrix.config.arch}}
-
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME${{matrix.compiler.id}}${{ matrix.indices.id}}${{matrix.arch.id}}
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
-          echo ARCH=${{matrix.config.arch}}
           
           # Build the image
           docker buildx build .\
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
+            --build-arg CC=${{ matrix.compiler.cc}}} \
+            --build-arg CXX=${{ matrix.compiler.cxx}} \
+            --build-arg 64BitIndex=${{ matrix.indices.64bit}} \
             --push \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --file Dockerfile \
-     
+  
 
   # Push the latest tag if everything build
+  # Note: this does not run on multiple archs because it combines the multiple arches into a single manifest
   push-latest:
-    needs: [get-version, build]
-    runs-on: ubuntu-latest 
+    needs: [ get-version, build ]
+    runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    strategy:
+      matrix:
+        compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
+        indices: [ { 64bit: 0, id: "" },  { 64bit: 1, id: "-64bitindex" } ]
 
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1            
-          
+        uses: docker/setup-buildx-action@v1
+
       - uses: actions/checkout@v2
-      
+
       - name: Log into registry
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
 
       - name: Run Test image
         run: |
           # Define the base image id
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME${{matrix.compiler.id}}${{ matrix.indices.id}}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           # build a manifest file for this version
@@ -176,15 +185,15 @@ jobs:
             $IMAGE_ID:latest \
             --amend $IMAGE_ID-arm64:${{ needs.get-version.outputs.petsc_commit}} \
             --amend $IMAGE_ID-amd64:${{ needs.get-version.outputs.petsc_commit}} 
-            
+          
           # push
           docker manifest push $IMAGE_ID:latest
 
   trigger-event:
     needs: push-latest
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     steps:
-      - name: Repository Dispatch to rebuild ABLATE dependcies
+      - name: Repository Dispatch to rebuild ABLATE dependencies
         uses: peter-evans/repository-dispatch@v1
         with:
           repository: UBCHREST/ablate
