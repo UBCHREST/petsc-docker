@@ -8,7 +8,7 @@ ARG PETSC_BUILD_COMMIT=main
 
 # Install dependencies
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils libtool clang-format pkg-config libpng-dev valgrind
+RUN apt-get update && apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils libtool clang clang-format pkg-config libpng-dev valgrind
 
 # Clone PETSc
 WORKDIR /
@@ -16,10 +16,16 @@ RUN git clone ${PETSC_URL} /petsc
 WORKDIR /petsc
 RUN git checkout $PETSC_BUILD_COMMIT
 
+# Set build options
+ARG CC=gcc
+ARG CXX=g++
+ARG Index64Bit=0
+
 # Setup shared configuration
-ENV PETSC_SETUP_ARGS --with-cc=gcc \
-	--with-cxx=g++ \
+ENV PETSC_SETUP_ARGS --with-cc=$CC \
+	--with-cxx=$CXX \
 	--with-fc=gfortran \
+	--with-64-bit-indices=$Index64Bit \
 	--download-mpich \
 	--download-fblaslapack \
 	--download-ctetgen \
@@ -44,10 +50,9 @@ ENV PETSC_SETUP_ARGS --with-cc=gcc \
 	--with-libpng \
 	--download-zlib
 
-# Configure & Build PETSc a 32-bit indices Debug Build
+# Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug
 run ./configure \
-	--with-64-bit-indices=0 \
 	--with-debugging=1 \
   --prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
@@ -55,21 +60,9 @@ run ./configure \
   rm -rf /petsc/${PETSC_ARCH} && \
   make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
-# Configure & Build PETSc a 32-bit indices Release Build
+# Configure & Build PETSc Release Build
 ENV PETSC_ARCH=arch-ablate-opt
 run ./configure \
-	--with-64-bit-indices=0 \
-	--with-debugging=0 \
-  --prefix=/petsc-install/${PETSC_ARCH} \
-	${PETSC_SETUP_ARGS} && \
-  make PETSC_DIR=/petsc all install && \
-  rm -rf /petsc/${PETSC_ARCH} && \
-  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
-
-# Configure & Build PETSc a 64-bit indices Release Build
-ENV PETSC_ARCH=arch-ablate-opt-64
-run ./configure \
-	--with-64-bit-indices=1 \
 	--with-debugging=0 \
   --prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
