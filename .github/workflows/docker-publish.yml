@@ -44,7 +44,7 @@ jobs:
       matrix:
         arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
-        indices: [ { 64bit: 0, id: "" },  { 64bit: 1, id: "-64bitindex" } ]
+        indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
 
     runs-on: ${{ matrix.arch.runson }}
     if: github.event_name != 'workflow_dispatch'
@@ -80,7 +80,7 @@ jobs:
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
             --build-arg CC=${{matrix.compiler.cc}}} \
             --build-arg CXX=${{matrix.compiler.cxx}} \
-            --build-arg 64BitIndex=${{matrix.indices.64bit}} \
+            --build-arg Index64Bit=${{matrix.indices.index64bit}} \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --load \
             --file Dockerfile 
@@ -101,7 +101,7 @@ jobs:
       matrix:
         arch: [ { runson: ARM64, id: -ARM64 }, { runson: ubuntu-latest, id: -AMD64 } ]
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
-        indices: [ { 64bit: 0, id: "" },  { 64bit: 1, id: "-64bitindex" } ]
+        indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
 
     runs-on: ${{ matrix.arch.runson }}
 
@@ -139,7 +139,7 @@ jobs:
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
             --build-arg CC=${{ matrix.compiler.cc}}} \
             --build-arg CXX=${{ matrix.compiler.cxx}} \
-            --build-arg 64BitIndex=${{ matrix.indices.64bit}} \
+            --build-arg Index64Bit=${{ matrix.indices.index64bit}} \
             --push \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --file Dockerfile \
@@ -154,7 +154,7 @@ jobs:
     strategy:
       matrix:
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
-        indices: [ { 64bit: 0, id: "" },  { 64bit: 1, id: "-64bitindex" } ]
+        indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
 
     steps:
       - name: Set up Docker Buildx

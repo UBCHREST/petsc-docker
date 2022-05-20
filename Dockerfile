@@ -19,13 +19,13 @@ RUN git checkout $PETSC_BUILD_COMMIT
 # Set build options
 ARG CC=gcc
 ARG CXX=g++
-ARG BitIndex64=0
+ARG Index64Bit=0
 
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--with-cxx=$CXX \
 	--with-fc=gfortran \
-	--with-64-bit-indices=$BitIndex64 \
+	--with-64-bit-indices=$Index64Bit \
 	--download-mpich \
 	--download-fblaslapack \
 	--download-ctetgen \
