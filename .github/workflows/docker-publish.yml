@@ -47,7 +47,6 @@ jobs:
         indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
 
     runs-on: ${{ matrix.arch.runson }}
-    if: github.event_name != 'workflow_dispatch'
 
     steps:
       - name: Set up Docker Buildx
