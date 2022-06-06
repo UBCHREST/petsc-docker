@@ -38,7 +38,7 @@ jobs:
 
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
+  test-matrix:
     needs: [ get-version ]
     strategy:
       matrix:
@@ -92,6 +92,12 @@ jobs:
           docker build .\
             --build-arg PETSC_BASE_IMAGE=$IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --file DockerAblateFile    
+
+  test:
+    runs-on: ubuntu-latest
+    needs: test-matrix
+    steps:
+      - run: echo All tests Successful!
 
   # Push image to GitHub Packages.
   build:
