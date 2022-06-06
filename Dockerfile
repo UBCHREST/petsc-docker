@@ -48,7 +48,8 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--download-tchem-commit=0354366 \
 	--download-opencascade \
 	--with-libpng \
-	--download-zlib
+	--download-zlib \
+	--download-tetgen
 
 # Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug
