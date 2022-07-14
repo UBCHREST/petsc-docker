@@ -44,7 +44,8 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--download-superlu_dist \
 	--download-triangle \
 	--download-slepc \
-	--download-tchem=https://github.com/UBCHREST/tchemv1.git \
+    --download-kokkos \
+    --download-tchem=https://github.com/UBCHREST/tchemv1.git \
 	--download-tchem-commit=0354366 \
 	--download-opencascade \
 	--with-libpng \
