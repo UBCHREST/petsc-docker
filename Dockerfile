@@ -1,4 +1,5 @@
-FROM ubuntu:hirsute
+# ubuntu:latest points to the latest LTS
+FROM ubuntu:latest
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
