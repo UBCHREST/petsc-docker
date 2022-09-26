@@ -41,6 +41,7 @@ jobs:
   test-matrix:
     needs: [ get-version ]
     strategy:
+      max-parallel: 1
       matrix:
         arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
@@ -104,6 +105,7 @@ jobs:
     needs: [get-version, test]
     if: github.event_name != 'pull_request'
     strategy:
+      max-parallel: 1
       matrix:
         arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
@@ -158,6 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     strategy:
+      max-parallel: 1
       matrix:
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
         indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
