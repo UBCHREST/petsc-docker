@@ -31,7 +31,7 @@ jobs:
         run: |
           # Get the latest version of petsc 
           export PETSC_COMMIT=$(git ls-remote https://gitlab.com/petsc/petsc.git HEAD | awk '{ print substr($1, 1, 8)}'D)
-          echo "::set-output name=petsc_commit::${PETSC_COMMIT}"
+          echo "petsc_commit=${PETSC_COMMIT}" >>$GITHUB_OUTPUT
 
     outputs:
       petsc_commit: ${{ steps.version.outputs.petsc_commit }}
