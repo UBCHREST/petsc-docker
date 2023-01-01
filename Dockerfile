@@ -28,6 +28,7 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--with-fc=gfortran \
 	--with-64-bit-indices=$Index64Bit \
 	--download-mpich \
+	--download-mpich-commit=4.0.2 \
 	--download-fblaslapack \
 	--download-ctetgen \
 	--download-egads \
@@ -45,7 +46,7 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--download-superlu_dist \
 	--download-triangle \
 	--download-slepc \
-    --download-kokkos \
+	--download-kokkos \
 	--download-opencascade \
 	--with-libpng \
 	--download-zlib \
