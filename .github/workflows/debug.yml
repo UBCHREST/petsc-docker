@@ -59,6 +59,7 @@ jobs:
           echo "      os: linux " >> config.version.yaml
           echo "  - image: $IMAGE_ID-amd64:$PETSC_VERSION " >> config.version.yaml
           echo "    platform: " >> config.version.yaml
+          echo "      architecture: amd64 " >> config.version.yaml
           echo "      os: linux " >> config.version.yaml
         
           # Generate the manifest and push
