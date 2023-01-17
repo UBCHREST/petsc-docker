@@ -2,7 +2,11 @@ name: Debug
 
 on:
   # Run tests for any PRs.
-  pull_request:
+  push:
+    # Publish `main` as Docker `latest` image.
+    branches:
+      - mcgurn/manifest-update
+
 
 env:
   IMAGE_NAME: petsc-build
