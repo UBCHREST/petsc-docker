@@ -20,6 +20,11 @@ on:
   # Run tests for any PRs.
   pull_request:
 
+# only allow one test per PR to be run
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 env:
   IMAGE_NAME: petsc-build
 
