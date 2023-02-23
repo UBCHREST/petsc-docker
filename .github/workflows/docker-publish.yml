@@ -20,6 +20,11 @@ on:
   # Run tests for any PRs.
   pull_request:
 
+# only allow one test per PR to be run
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 env:
   IMAGE_NAME: petsc-build
 
@@ -42,7 +47,7 @@ jobs:
     needs: [ get-version ]
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 1
       matrix:
         arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
@@ -77,8 +82,7 @@ jobs:
           
           # build the petsc-image
           docker buildx build .\
-            --cache-from "type=local,src=/tmp/.buildx-cache" \
-            --cache-to "type=local,dest=/tmp/.buildx-cache" \
+            --provenance false \
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
             --build-arg CC=${{matrix.compiler.cc}} \
             --build-arg CXX=${{matrix.compiler.cxx}} \
@@ -144,8 +148,7 @@ jobs:
           
           # Build the image
           docker buildx build .\
-            --cache-from "type=local,src=/tmp/.buildx-cache" \
-            --cache-to "type=local,dest=/tmp/.buildx-cache" \
+            --provenance false \
             --build-arg PETSC_BUILD_COMMIT=${{ needs.get-version.outputs.petsc_commit}} \
             --build-arg CC=${{ matrix.compiler.cc}} \
             --build-arg CXX=${{ matrix.compiler.cxx}} \
@@ -175,53 +178,29 @@ jobs:
       - name: Log into registry
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
 
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '>=1.18.10'
-
-      - name: Build Manifest Tool
+      - name: Build Manifest
         run: |
-            git clone https://github.com/estesp/manifest-tool
-            cd manifest-tool && make binary
-            cd ..
-
-      - name: Build and push manifest
-        run: |
-          export PETSC_VERSION=${{ needs.get-version.outputs.petsc_commit}}
-          
           # Define the base image id
           IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME${{matrix.compiler.id}}${{ matrix.indices.id}}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
-          # Write the config to the file
-          echo "image: $IMAGE_ID:$PETSC_VERSION" > config.version.yaml
-          echo "manifests:" >> config.version.yaml
-          echo "  - image: $IMAGE_ID-arm64:$PETSC_VERSION " >> config.version.yaml
-          echo "    platform: " >> config.version.yaml
-          echo "      architecture: arm64 " >> config.version.yaml
-          echo "      os: linux " >> config.version.yaml
-          echo "  - image: $IMAGE_ID-amd64:$PETSC_VERSION " >> config.version.yaml
-          echo "    platform: " >> config.version.yaml
-          echo "      architecture: amd64 " >> config.version.yaml
-          echo "      os: linux " >> config.version.yaml
-        
-          # Generate the manifest and push
-          manifest-tool/manifest-tool push from-spec config.version.yaml
-        
-          # Repeat for the latest tag
-          echo "image: $IMAGE_ID:latest" > config.latest.yaml
-          echo "manifests:" >> config.latest.yaml
-          echo "  - image: $IMAGE_ID-arm64:$PETSC_VERSION " >> config.latest.yaml
-          echo "    platform: " >> config.latest.yaml
-          echo "      architecture: arm64 " >> config.latest.yaml
-          echo "      os: linux " >> config.latest.yaml
-          echo "  - image: $IMAGE_ID-amd64:$PETSC_VERSION " >> config.latest.yaml
-          echo "    platform: " >> config.latest.yaml
-          echo "      architecture: amd64 " >> config.latest.yaml
-          echo "      os: linux " >> config.latest.yaml
-        
-          # Generate the manifest and push
-          manifest-tool/manifest-tool push from-spec config.latest.yaml
+          # build a manifest file for this version
+          docker manifest create \
+            $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
+            --amend $IMAGE_ID-arm64:${{ needs.get-version.outputs.petsc_commit}} \
+            --amend $IMAGE_ID-amd64:${{ needs.get-version.outputs.petsc_commit}} 
+
+          # push
+          docker manifest push $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}}
+
+          # tag as latest
+          docker manifest create \
+            $IMAGE_ID:latest \
+            --amend $IMAGE_ID-arm64:${{ needs.get-version.outputs.petsc_commit}} \
+            --amend $IMAGE_ID-amd64:${{ needs.get-version.outputs.petsc_commit}} 
+          
+          # push
+          docker manifest push $IMAGE_ID:latest
 
   trigger-event:
     needs: push-latest
