@@ -158,14 +158,15 @@ jobs:
             --file Dockerfile \
   
 
-  # Push the latest tag if everything build
-  # Note: this does not run on multiple archs because it combines the multiple arches into a single manifest
+  # Push the latest tag if everything build.  Note this must run on max-parallel=1
   push-latest:
     needs: [ get-version, build ]
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     strategy:
+      max-parallel: 1
       matrix:
+        arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]
         indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
 
@@ -181,26 +182,19 @@ jobs:
       - name: Build Manifest
         run: |
           # Define the base image id
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME${{matrix.compiler.id}}${{ matrix.indices.id}}
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME${{matrix.compiler.id}}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
-          # build a manifest file for this version
-          docker manifest create \
-            $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
-            --amend $IMAGE_ID-arm64:${{ needs.get-version.outputs.petsc_commit}} \
-            --amend $IMAGE_ID-amd64:${{ needs.get-version.outputs.petsc_commit}} 
-
-          # push
-          docker manifest push $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}}
-
-          # tag as latest
-          docker manifest create \
-            $IMAGE_ID:latest \
-            --amend $IMAGE_ID-arm64:${{ needs.get-version.outputs.petsc_commit}} \
-            --amend $IMAGE_ID-amd64:${{ needs.get-version.outputs.petsc_commit}} 
-          
-          # push
-          docker manifest push $IMAGE_ID:latest
+          # check if image exisits 
+          if docker manifest inspect $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} > /dev/null; then
+            echo "Appending manifest"
+            docker buildx imagetools create -t $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} --append $IMAGE_ID${{matrix.arch.id}}:${{ needs.get-version.outputs.petsc_commit}}
+            docker buildx imagetools create -t $IMAGE_ID:latest --append $IMAGE_ID${{matrix.arch.id}}:${{ needs.get-version.outputs.petsc_commit}}
+          else
+            echo "Creating new manifest"
+            docker buildx imagetools create -t $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} $IMAGE_ID${{matrix.arch.id}}:${{ needs.get-version.outputs.petsc_commit}}
+            docker buildx imagetools create -t $IMAGE_ID:latest $IMAGE_ID${{matrix.arch.id}}:${{ needs.get-version.outputs.petsc_commit}}
+          fi
 
   trigger-event:
     needs: push-latest
