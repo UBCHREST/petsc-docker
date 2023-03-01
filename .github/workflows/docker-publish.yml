@@ -72,7 +72,7 @@ jobs:
 
       - name: Run Test image
         # don't run the tests if this was manually pushed
-        if: github.event_name != 'workflow_dispatch'
+        if: contains(fromJSON('["schedule", "pull_request"]'), github.event_name)        
         run: |
           # define the image id
           IMAGE_ID=$IMAGE_NAME${{matrix.compiler.id}}${{matrix.indices.id}}${{matrix.arch.id}}
