@@ -182,7 +182,7 @@ jobs:
       - name: Build Manifest
         run: |
           # Define the base image id
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME${{matrix.compiler.id}}
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME${{matrix.compiler.id}}${{ matrix.indices.id}}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           # check if image exisits 
