@@ -43,6 +43,7 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--download-triangle \
 	--download-slepc \
     --download-kokkos \
+    --download-kokkos-commit=3.7.01 \
 	--download-opencascade \
 	--with-libpng \
 	--download-zlib \
