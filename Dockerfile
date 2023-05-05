@@ -52,22 +52,22 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 # Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug
 run ./configure \
-	--with-debugging=1 \
-  --prefix=/petsc-install/${PETSC_ARCH} \
+	--with-debugging=1 COPTFLAGS="-g -O0 -fsanitize=address" CXXOPTFLAGS="-g -O0 -fsanitize=address" FOPTFLAGS="-g -O0 -fsanitize=address" \
+	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
-  make PETSC_DIR=/petsc all install && \
-  rm -rf /petsc/${PETSC_ARCH} && \
-  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
+	make PETSC_DIR=/petsc all install && \
+	rm -rf /petsc/${PETSC_ARCH} && \
+	make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
 # Configure & Build PETSc Release Build
 ENV PETSC_ARCH=arch-ablate-opt
 run ./configure \
-	--with-debugging=0 \
-  --prefix=/petsc-install/${PETSC_ARCH} \
+	--with-debugging=0 COPTFLAGS="-g -O3 -fsanitize=address" CXXOPTFLAGS="-g -O3 -fsanitize=address" FOPTFLAGS="-g -O3 -fsanitize=address" \
+	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
-  make PETSC_DIR=/petsc all install && \
-  rm -rf /petsc/${PETSC_ARCH} && \
-  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
+	make PETSC_DIR=/petsc all install && \
+	rm -rf /petsc/${PETSC_ARCH} && \
+	make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
 ENV PETSC_DIR=/petsc-install
 
