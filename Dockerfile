@@ -23,7 +23,8 @@ ARG CXX=g++
 ARG Index64Bit=0
 
 # These are extra flags
-ARG OPTFLAGS=""
+ARG DEBUGFLAGS="-g -O0"
+ARG OPTFLAGS="-g -O"
 
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=$CC \
@@ -54,7 +55,7 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 # Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug
 run ./configure \
-	--with-debugging=1 COPTFLAGS="-g -O0 ${OPTFLAGS}" CXXOPTFLAGS="-g -O0 ${OPTFLAGS}" FOPTFLAGS="-g -O0 ${OPTFLAGS}" \
+	--with-debugging=1 COPTFLAGS="${DEBUGFLAGS}" CXXOPTFLAGS="${DEBUGFLAGS}" FOPTFLAGS="${DEBUGFLAGS}" \
 	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
 	make PETSC_DIR=/petsc all install && \
@@ -64,7 +65,7 @@ run ./configure \
 # Configure & Build PETSc Release Build
 ENV PETSC_ARCH=arch-ablate-opt
 run ./configure \
-	--with-debugging=0 COPTFLAGS="-g -O3 ${OPTFLAGS}" CXXOPTFLAGS="-g -O3 ${OPTFLAGS}" FOPTFLAGS="-g -O3 ${OPTFLAGS}" \
+	--with-debugging=0 COPTFLAGS="${OPTFLAGS}" CXXOPTFLAGS="${OPTFLAGS}" FOPTFLAGS="${OPTFLAGS}" \
 	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
 	make PETSC_DIR=/petsc all install && \
