@@ -87,7 +87,7 @@ jobs:
             --build-arg CC=${{matrix.compiler.cc}} \
             --build-arg CXX=${{matrix.compiler.cxx}} \
             --build-arg DEBUGFLAGS="${{matrix.compiler.debugFlags}}" \
-            --build-arg CXXOPTFLAGS="${{matrix.compiler.optFlags}}" \
+            --build-arg OPTFLAGS="${{matrix.compiler.optFlags}}" \
             --build-arg Index64Bit=${{matrix.indices.index64bit}} \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
             --load \
@@ -155,7 +155,7 @@ jobs:
             --build-arg CC=${{ matrix.compiler.cc}} \
             --build-arg CXX=${{ matrix.compiler.cxx}} \
             --build-arg DEBUGFLAGS="${{matrix.compiler.debugFlags}}" \
-            --build-arg CXXOPTFLAGS="${{matrix.compiler.optFlags}}" \
+            --build-arg OPTFLAGS="${{matrix.compiler.optFlags}}" \
             --build-arg Index64Bit=${{ matrix.indices.index64bit}} \
             --push \
             --tag $IMAGE_ID:${{ needs.get-version.outputs.petsc_commit}} \
