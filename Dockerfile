@@ -22,6 +22,10 @@ ARG CC=gcc
 ARG CXX=g++
 ARG Index64Bit=0
 
+# These are extra flags
+ARG DEBUGFLAGS="-g -O0"
+ARG OPTFLAGS="-g -O"
+
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--with-cxx=$CXX \
@@ -35,7 +39,6 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--download-hdf5 \
 	--download-metis \
 	--download-mumps \
-	--download-p4est \
 	--download-parmetis \
 	--download-scalapack \
 	--download-suitesparse \
@@ -52,22 +55,22 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 # Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug
 run ./configure \
-	--with-debugging=1 \
-  --prefix=/petsc-install/${PETSC_ARCH} \
+	--with-debugging=1 COPTFLAGS="${DEBUGFLAGS}" CXXOPTFLAGS="${DEBUGFLAGS}" FOPTFLAGS="${DEBUGFLAGS}" \
+	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
-  make PETSC_DIR=/petsc all install && \
-  rm -rf /petsc/${PETSC_ARCH} && \
-  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
+	make PETSC_DIR=/petsc all install && \
+	rm -rf /petsc/${PETSC_ARCH} && \
+	make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
 # Configure & Build PETSc Release Build
 ENV PETSC_ARCH=arch-ablate-opt
 run ./configure \
-	--with-debugging=0 \
-  --prefix=/petsc-install/${PETSC_ARCH} \
+	--with-debugging=0 COPTFLAGS="${OPTFLAGS}" CXXOPTFLAGS="${OPTFLAGS}" FOPTFLAGS="${OPTFLAGS}" \
+	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
-  make PETSC_DIR=/petsc all install && \
-  rm -rf /petsc/${PETSC_ARCH} && \
-  make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
+	make PETSC_DIR=/petsc all install && \
+	rm -rf /petsc/${PETSC_ARCH} && \
+	make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
 
 ENV PETSC_DIR=/petsc-install
 
