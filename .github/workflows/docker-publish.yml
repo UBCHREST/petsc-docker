@@ -17,9 +17,6 @@ on:
   workflow_dispatch:
   # Allow this event to be triggered in the github ui
 
-  # Run tests for any PRs.
-  pull_request:
-
 # only allow one test per PR to be run
 concurrency:
   group: ${{ github.head_ref || github.ref_name }}
@@ -161,12 +158,10 @@ jobs:
     steps:
       - run: echo All tests Successful!
 
-
   # Push the latest tag if everything build and tested.  Note this must run on max-parallel=1
   push-latest:
     needs: [ get-version, test ]
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     strategy:
       max-parallel: 1
       matrix:
