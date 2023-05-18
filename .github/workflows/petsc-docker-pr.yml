@@ -31,7 +31,6 @@ jobs:
     needs: [ get-version ]
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
         arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
         compiler: [ { cc: gcc, cxx: g++, id: -gcc }, { cc: clang, cxx: clang++, id: -clang } ]

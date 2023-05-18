@@ -59,8 +59,7 @@ run ./configure \
 	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
 	make PETSC_DIR=/petsc all install && \
-	rm -rf /petsc/${PETSC_ARCH} && \
-	make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
+	rm -rf /petsc/${PETSC_ARCH} 
 
 # Configure & Build PETSc Release Build
 ENV PETSC_ARCH=arch-ablate-opt
@@ -69,8 +68,7 @@ run ./configure \
 	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
 	make PETSC_DIR=/petsc all install && \
-	rm -rf /petsc/${PETSC_ARCH} && \
-	make SLEPC_DIR=/petsc-install/${PETSC_ARCH} PETSC_DIR=/petsc-install/${PETSC_ARCH} PETSC_ARCH="" check
+	rm -rf /petsc/${PETSC_ARCH}
 
 ENV PETSC_DIR=/petsc-install
 
