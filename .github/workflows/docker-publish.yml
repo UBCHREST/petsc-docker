@@ -128,7 +128,7 @@ jobs:
         if: contains(fromJSON('["schedule", "pull_request"]'), github.event_name)        
         run: |
           # define the image id
-          IMAGE_ID=$IMAGE_NAME${{matrix.compiler.id}}${{matrix.indices.id}}${{matrix.arch.id}}
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME${{matrix.compiler.id}}${{matrix.indices.id}}${{matrix.arch.id}}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
