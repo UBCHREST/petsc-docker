@@ -24,4 +24,4 @@ run mkdir ${PETSC_ARCH} && \
 
 # Run tests
 WORKDIR ${PETSC_ARCH}
-run bash -c "make format-check && ctest"
+run bash -c "make format-check && ctest -L 'unitTests|integrationTests'"
