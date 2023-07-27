@@ -1,15 +1,11 @@
-# ubuntu:latest points to the latest LTS
-FROM ubuntu:latest
+# from the prebuilt chrest base image
+FROM ghcr.io/ubchrest/chrest-base-image/chrest-base-image:latest AS builder
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
 
 # Pass in required arguments
 ARG PETSC_BUILD_COMMIT=main
-
-# Install dependencies
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -y install build-essential gfortran git cmake autoconf automake git python3 python3-distutils libtool clang libomp-dev clang-format pkg-config libpng-dev valgrind curl
 
 # Clone PETSc
 WORKDIR /
@@ -58,8 +54,7 @@ run ./configure \
 	--with-debugging=1 COPTFLAGS="${DEBUGFLAGS}" CXXOPTFLAGS="${DEBUGFLAGS}" FOPTFLAGS="${DEBUGFLAGS}" \
 	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
-	make PETSC_DIR=/petsc all install && \
-	rm -rf /petsc/${PETSC_ARCH} 
+	make PETSC_DIR=/petsc all install 
 
 # Configure & Build PETSc Release Build
 ENV PETSC_ARCH=arch-ablate-opt
@@ -67,8 +62,11 @@ run ./configure \
 	--with-debugging=0 COPTFLAGS="${OPTFLAGS}" CXXOPTFLAGS="${OPTFLAGS}" FOPTFLAGS="${OPTFLAGS}" \
 	--prefix=/petsc-install/${PETSC_ARCH} \
 	${PETSC_SETUP_ARGS} && \
-	make PETSC_DIR=/petsc all install && \
-	rm -rf /petsc/${PETSC_ARCH}
+	make PETSC_DIR=/petsc all install 
+
+# Now create a new image from the base and copy over only what we need
+FROM ghcr.io/ubchrest/chrest-base-image/chrest-base-image:latest
+COPY --from=builder /petsc-install /petsc-install
 
 ENV PETSC_DIR=/petsc-install
 
