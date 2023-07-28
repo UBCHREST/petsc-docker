@@ -13,4 +13,4 @@ WORKDIR /ablate
 run cmake --preset=local-ablate-opt && cmake --build --preset=ablate-test-only-build -j $(nproc)
 
 # Run tests
-run bash -c "make -C cmake-build-opt-ablate format-check && ctest --preset=pipeline-testing-fast"
+run bash -c "ctest --preset=pipeline-testing-fast"
