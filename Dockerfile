@@ -1,5 +1,6 @@
 # from the prebuilt chrest base image
-FROM ghcr.io/ubchrest/chrest-base-image/chrest-base-image:latest AS builder
+ARG CHREST_BASE_IMAGE=ghcr.io/ubchrest/chrest-base-image/chrest-base-image:latest
+FROM $CHREST_BASE_IMAGE AS builder
 
 # Define Constants
 ENV PETSC_URL https://gitlab.com/petsc/petsc.git
@@ -65,7 +66,7 @@ run ./configure \
 	make PETSC_DIR=/petsc all install 
 
 # Now create a new image from the base and copy over only what we need
-FROM ghcr.io/ubchrest/chrest-base-image/chrest-base-image:latest
+FROM $CHREST_BASE_IMAGE
 COPY --from=builder /petsc-install /petsc-install
 
 ENV PETSC_DIR=/petsc-install
