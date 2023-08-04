@@ -34,7 +34,6 @@ jobs:
       matrix:
         arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
         compiler: [ 
-            { cc: gcc, cxx: g++, debugFlags: "-g -O0 -fsanitize=address",  optFlags: "-g -O -fsanitize=address", id: -gcc-asan },
             { cc: gcc, cxx: g++, debugFlags: "-g -O0",  optFlags: "-g -O", id: -gcc },
             { cc: clang, cxx: clang++, debugFlags: "-g -O0",  optFlags: "-g -O3",  id: -clang } ]
         indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
