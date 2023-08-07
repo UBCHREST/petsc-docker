@@ -56,9 +56,6 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=${{ needs.get-version.outputs.petsc_commit}}
           
-          # clean before building 
-          docker system prune -a -f --volumes
-          
           # build the petsc-image
           docker buildx build .\
             --provenance false \
