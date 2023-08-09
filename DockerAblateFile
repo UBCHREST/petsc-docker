@@ -1,27 +1,16 @@
 ARG PETSC_BASE_IMAGE
 FROM $PETSC_BASE_IMAGE
 
-# Install dependencies
-RUN apt-get update && apt-get install -y clang-format
-
 # Define location of ABLATE
 ENV ABLATE_URL https://github.com/UBCHREST/ablate.git
 
 # Clone ABLATE
 WORKDIR /
 run git clone ${ABLATE_URL} /ablate
+WORKDIR /ablate
 
-
-# Test opt build
-WORKDIR /
-ENV PETSC_ARCH=arch-ablate-opt \
-  PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH" \
-	PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
-
-run mkdir ${PETSC_ARCH} && \
-	cmake -DCMAKE_BUILD_TYPE=Release -S ablate -B ${PETSC_ARCH} && \
-	make -C ${PETSC_ARCH} -j $(nproc)
+# Configure & build & clean up the intermediate files to prevent file size bloat
+run cmake --preset=local-ablate-opt && cmake --build --preset=ablate-test-only-build -j $(nproc)
 
 # Run tests
-WORKDIR ${PETSC_ARCH}
-run bash -c "make format-check && ctest -L 'unitTests|integrationTests'"
+run bash -c "ctest --preset=pipeline-testing-fast"
