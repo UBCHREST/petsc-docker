@@ -52,25 +52,23 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 # Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug
 run ./configure \
-	--with-debugging=1 COPTFLAGS="${DEBUGFLAGS}" CXXOPTFLAGS="${DEBUGFLAGS}" \
+	--with-debugging=1 COPTFLAGS="${DEBUGFLAGS}" CXXOPTFLAGS="${DEBUGFLAGS}" FOPTFLAGS="${DEBUGFLAGS}" \
 	--prefix=/petsc-install/${PETSC_ARCH} \
-	${PETSC_SETUP_ARGS}
-	
-	#  && \
-# 	make PETSC_DIR=/petsc all install 
-# 
-# # Configure & Build PETSc Release Build
-# ENV PETSC_ARCH=arch-ablate-opt
-# run ./configure \
-# 	--with-debugging=0 COPTFLAGS="${OPTFLAGS}" CXXOPTFLAGS="${OPTFLAGS}"  \
-# 	--prefix=/petsc-install/${PETSC_ARCH} \
-# 	${PETSC_SETUP_ARGS} && \
-# 	make PETSC_DIR=/petsc all install 
-# 
-# # Now create a new image from the base and copy over only what we need
-# FROM $CHREST_BASE_IMAGE
-# COPY --from=builder /petsc-install /petsc-install
-# 
-# ENV PETSC_DIR=/petsc-install
+	${PETSC_SETUP_ARGS} && \
+	make PETSC_DIR=/petsc all install 
+
+# Configure & Build PETSc Release Build
+ENV PETSC_ARCH=arch-ablate-opt
+run ./configure \
+	--with-debugging=0 COPTFLAGS="${OPTFLAGS}" CXXOPTFLAGS="${OPTFLAGS}" FOPTFLAGS="${OPTFLAGS}" \
+	--prefix=/petsc-install/${PETSC_ARCH} \
+	${PETSC_SETUP_ARGS} && \
+	make PETSC_DIR=/petsc all install 
+
+# Now create a new image from the base and copy over only what we need
+FROM $CHREST_BASE_IMAGE
+COPY --from=builder /petsc-install /petsc-install
+
+ENV PETSC_DIR=/petsc-install
 
 
