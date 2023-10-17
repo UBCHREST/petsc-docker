@@ -26,28 +26,22 @@ ARG OPTFLAGS="-g -O"
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--with-cxx=$CXX \
-	--with-fc=gfortran \
+	--with-fc=0 \
 	--with-64-bit-indices=$Index64Bit \
 	--download-mpich \
-	--download-fblaslapack \
+	--download-f2cblaslapack \
 	--download-ctetgen \
+	--download-tetgen \
+	--download-parmetis \
 	--download-egads \
-	--download-fftw \
+	--download-opencascade \
 	--download-hdf5 \
 	--download-metis \
-	--download-mumps \
-	--download-parmetis \
-	--download-scalapack \
-	--download-suitesparse \
 	--download-superlu_dist \
 	--download-triangle \
 	--download-slepc \
     --download-kokkos \
-    --download-kokkos-commit=3.7.01 \
-	--download-opencascade \
-	--with-libpng \
-	--download-zlib \
-	--download-tetgen
+    --download-kokkos-commit=3.7.01 
 
 # Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug

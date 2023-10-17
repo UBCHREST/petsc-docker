@@ -10,4 +10,4 @@ docker build . --file Dockerfile --tag=petsc-build
 ## To test against Ablate
 
 ```
-docker build . --file DockerAblateFile --tag ablate-build --build-arg PETSC_BASE_IMAGE=petsc-build
+docker buildx build . --file DockerAblateFile --tag ablate-build --build-arg PETSC_BASE_IMAGE=petsc-build
