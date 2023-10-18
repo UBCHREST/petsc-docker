@@ -42,9 +42,6 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
     --download-kokkos \
     --download-kokkos-commit=3.7.01 
 
-#	--download-superlu_dist \
-
-
 # Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug
 run ./configure \
