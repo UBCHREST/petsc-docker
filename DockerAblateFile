@@ -6,7 +6,7 @@ ENV ABLATE_URL https://github.com/UBCHREST/ablate.git
 
 # Clone ABLATE
 WORKDIR /
-run git clone ${ABLATE_URL} /ablate
+run git clone -depth 1 ${ABLATE_URL} /ablate
 WORKDIR /ablate
 
 # Configure & build & clean up the intermediate files to prevent file size bloat

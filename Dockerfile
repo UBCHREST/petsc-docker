@@ -10,7 +10,7 @@ ARG PETSC_BUILD_COMMIT=main
 
 # Clone PETSc
 WORKDIR /
-RUN git clone ${PETSC_URL} /petsc
+RUN git clone --depth 5 ${PETSC_URL} /petsc
 WORKDIR /petsc
 RUN git checkout $PETSC_BUILD_COMMIT
 
@@ -32,16 +32,18 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--download-f2cblaslapack \
 	--download-ctetgen \
 	--download-tetgen \
+	--download-metis \
 	--download-parmetis \
 	--download-egads \
 	--download-opencascade \
 	--download-hdf5 \
-	--download-metis \
-	--download-superlu_dist \
 	--download-triangle \
 	--download-slepc \
     --download-kokkos \
     --download-kokkos-commit=3.7.01 
+
+#	--download-superlu_dist \
+
 
 # Configure & Build PETSc Debug Build
 ENV PETSC_ARCH=arch-ablate-debug

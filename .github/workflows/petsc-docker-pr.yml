@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
+        arch: [ { runson: ARM64, id: -arm64, clean: false }, { runson: ubuntu-latest, id: -amd64, clean: true } ]
         compiler: [ 
             { cc: gcc, cxx: g++, debugFlags: "-g -O0",  optFlags: "-g -O", id: -gcc },
             { cc: clang, cxx: clang++, debugFlags: "-g -O0",  optFlags: "-g -O3",  id: -clang } ]
@@ -46,7 +46,11 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Run Test image
+      - name: Clean up Docker images
+        if:  ${{ matrix.arch.clean == 'true' }}
+        run: docker system prune --volumes --force
+
+      - name: Run Build the test petsc and ablate images
         # don't run the tests if this was manually pushed
         if: contains(fromJSON('["schedule", "pull_request"]'), github.event_name)        
         run: |
