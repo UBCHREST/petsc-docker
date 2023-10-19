@@ -36,6 +36,7 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--download-parmetis \
 	--download-egads \
 	--download-opencascade \
+	--download-superlu_dist \
 	--download-hdf5 \
 	--download-triangle \
 	--download-slepc \
