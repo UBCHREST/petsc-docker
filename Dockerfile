@@ -26,10 +26,8 @@ ARG OPTFLAGS="-g -O"
 # Setup shared configuration
 ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--with-cxx=$CXX \
-	--with-fc=0 \
 	--with-64-bit-indices=$Index64Bit \
 	--download-mpich \
-	--download-f2cblaslapack \
 	--download-ctetgen \
 	--download-tetgen \
 	--download-metis \
@@ -37,10 +35,14 @@ ENV PETSC_SETUP_ARGS --with-cc=$CC \
 	--download-egads \
 	--download-opencascade \
 	--download-superlu_dist \
+	# commit needed for zerork
+ 	--download-superlu_dist-commit=v6.4.0 \
+ 	--download-superlu_dist-cmake-arguments='-DXSDK_ENABLE_Fortran=OFF' \ 
 	--download-hdf5 \
 	--download-triangle \
 	--download-slepc \
     --download-kokkos \
+    # commit needed for tchem
     --download-kokkos-commit=3.7.01 
 
 # Configure & Build PETSc Debug Build
