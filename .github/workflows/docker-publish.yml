@@ -44,7 +44,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
+        arch: [ { runson: ubuntu-latest, id: -amd64 } ]
+        #arch: [ { runson: ARM64, id: -arm64}, { runson: ubuntu-latest, id: -amd64 } ] # disabling arm64 until we can figure out either new machines to run these on or wipe/ reset Matt's old ones -klb
         compiler: [ 
             { cc: gcc, cxx: g++, debugFlags: "-g -O0",  optFlags: "-g -O", id: -gcc },
             { cc: clang, cxx: clang++, debugFlags: "-g -O0",  optFlags: "-g -O3",  id: -clang } ]
@@ -115,7 +116,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
+        arch: [ { runson: ubuntu-latest, id: -amd64 } ]
+        #arch: [ { runson: ARM64, id: -arm64}, { runson: ubuntu-latest, id: -amd64 } ] # disabling arm64 until we can figure out either new machines to run these on or wipe/ reset Matt's old ones -klb
         compiler: [ 
             { cc: gcc, cxx: g++, debugFlags: "-g -O0",  optFlags: "-g -O", id: -gcc },
             { cc: clang, cxx: clang++, debugFlags: "-g -O0",  optFlags: "-g -O3",  id: -clang } ]
@@ -166,7 +168,8 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        arch: [ { runson: ARM64, id: -arm64 }, { runson: ubuntu-latest, id: -amd64 } ]
+        arch: [ { runson: ubuntu-latest, id: -amd64 } ]
+        #arch: [ { runson: ARM64, id: -arm64}, { runson: ubuntu-latest, id: -amd64 } ] # disabling arm64 until we can figure out either new machines to run these on or wipe/ reset Matt's old ones -klb
         compiler: [ {id: -gcc }, { id: -clang } ]
         indices: [ { index64bit: 0, id: "" },  { index64bit: 1, id: "-index64" } ]
         include:
