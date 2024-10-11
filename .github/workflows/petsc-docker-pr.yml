@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [ { runson: ubuntu-latest, id: -amd64 } ]
-        #arch: [ { runson: ARM64, id: -arm64}, { runson: ubuntu-latest, id: -amd64 } ] # disabling arm64 until we can figure out either new machines to run these on or wipe/ reset Matt's old ones -klb
+        #arch: [ { runson: ARM64, id: -arm64}, { runson: ubuntu-latest, id: -amd64 } ] # disabling arm64 until we can figure out either new machines to run these on or wipe/ reset Matt's old ones -klb 
         compiler: [ 
             { cc: gcc, cxx: g++, debugFlags: "-g -O0",  optFlags: "-g -O", id: -gcc },
             { cc: clang, cxx: clang++, debugFlags: "-g -O0",  optFlags: "-g -O3",  id: -clang } ]
